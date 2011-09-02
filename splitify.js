@@ -25,7 +25,8 @@
 				row: {type:'div',classes:''},
 				button: {text:'Add a row',classes:''},
 				validation: {regexp:false,callback:function(){}},
-				separator: ','
+				separator: ',',
+				allow_blank: false
 			};
 			this.options = $.extend(defaults, this.options);
 		};
@@ -85,9 +86,12 @@
 		Splitify.prototype.replaceData = function(index) {
 			var _this = this;
 			var content = [];
-			var must_validate = typeof _this.options.validation == "object" && typeof _this.options.validation.callback == "function"
+			var must_validate = typeof _this.options.validation == "object" &&
+							    typeof _this.options.validation.regexp == "object"
+							    typeof _this.options.validation.callback == "function"
 			var is_valid = true;
 			this.context.find('.splitified').each(function(){
+				var must_be_saved = true;
 				var val =  $(this).val();
 				if(must_validate){ // check with given Regexp
 					if(!_this.options.validation.regexp.test(val)){
@@ -95,8 +99,10 @@
 						_this.options.validation.callback(this);
 						return true; // continue
 					}
+				}else{
+					if(!_this.options.allow_blank && $.trim(val)=='') must_be_saved = false;
 				}
-				if(is_valid) content.push(val);
+				if(is_valid&&must_be_saved) content.push(val);
 			});
 			if(is_valid) this.source.val(content.join(this.options.separator));
 			return is_valid;
